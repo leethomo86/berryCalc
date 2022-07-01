@@ -1,0 +1,38 @@
+#
+# ResHF ROBODoc control file 
+# 
+# L. M. Thompson 13/05/19
+#
+options:
+    --src . 
+    --doc ./doc/berryCalc
+    --singledoc 
+#    --html
+#    --latex
+#    --rtf
+    --ascii
+    --documenttitle "Berry Phase Calculator"
+    --tabsize 8
+items:
+    SYNOPSIS
+    NAME
+    COPYRIGHT
+    USAGE
+    AUTHOR
+    OPTIONS
+    NOTES
+headertypes:
+    x  "Main Program"  main 
+header markers:
+    !****
+end markers:
+    !****
+remark begin markers:
+    !*
+remark end markers:
+    !*
+remark markers:
+    !*
+source line comments:
+    !
+
