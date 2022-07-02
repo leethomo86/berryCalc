@@ -11,9 +11,12 @@ use Math::Trig;
 my $rad = 0.01;
 my $steps = 5;
 
+my $molecule = 'ozone';
 my $symmetry = 'time-reversal';
 my $method = 'rhf';
 my $inputfile = 'input.txt';
+my $projroot = '~/Documents/Wheeler-HIll-PUHF';
+my $nociroot = '~/Documents/ResHF';
 open(INPUT,'<',$inputfile) or die $!;
 chomp(my $numfiles = <INPUT>);
 my @chkfile = ();
@@ -46,9 +49,9 @@ foreach my $temp (@ARGV){
         $sub = 0;
       }elsif($temp =~ /^-noscf/i){
         $scfsub = 0;
-      }elsif($temp =~ /^-projstate=(\d+)$/i){
+      }elsif($temp =~ /^-projstate=(-?\d+)$/i){
         $proj_state = $1;
-      }elsif($temp =~ /^-nocistate=(\d+)$/i){
+      }elsif($temp =~ /^-nocistate=(-?\d+)$/i){
         $berry_state = $1;
       }elsif($temp =~ /^-direct/i){
         $direct = '--direct';
@@ -80,7 +83,7 @@ if ($scfsub eq 1){
 		for (my $theta=0.0; $theta<2*pi; $theta+=2*pi/$steps){
 			my $i = $rad*cos($theta);
 			my $j = $rad*sin($theta);
-		        my $gjf = "ozone_sol"."$state"."_angle_".sprintf("%.3f",$theta);
+		        my $gjf = "$molecule"."_sol"."$state"."_angle_".sprintf("%.3f",$theta);
 		        open  (GJF,">$gjf.com") or die "Could not create $gjf.\n";
 		        print GJF "%oldchk=$curdir/$chkfile[$state]\n";
 		        print GJF "%chk=$curdir/STATE_$state/$gjf.chk\n";
@@ -90,7 +93,7 @@ if ($scfsub eq 1){
 			}else{
 				print GJF "# IOp(5/194=4,5/10=500) scf=(conven,conver=6,novaracc,maxcycles=250) nosymm\n\n";
 			}
-		        print GJF "Ozone scan. State = ".$state.", X = ".sprintf("%.5f",$i).", Y = ".sprintf("%.5f",$j)."\n\n";
+		        print GJF "$molecule scan. State = ".$state.", X = ".sprintf("%.5f",$i).", Y = ".sprintf("%.5f",$j)."\n\n";
 		        print GJF "0 1\n";
 			for(my $line=0; $line<=$#coords; $line++){
 			  	printf GJF "%s %.6f %.6f %.6f\n",$coords[$line][0], 
@@ -105,19 +108,19 @@ if ($scfsub eq 1){
 	}
 }
 
-#build NOCI directory with correct files pointing to SCF directories
+#build PROJ directory with correct files pointing to SCF directories
 if ($proj_state ne -1){
-	mkdir("PROJ") or $!{EEXIST} or die("Can't create directory \"NOCI\": $!\n");
+	mkdir("PROJ") or $!{EEXIST} or die("Can't create directory \"PROJ\": $!\n");
 	chdir("PROJ");
 	for (my $theta=0.0; $theta<2*pi; $theta+=2*pi/$steps){
 		my $i = $rad*cos($theta);
 		my $j = $rad*sin($theta);
-	        my $gjf = "ozone_PROJ_angle_".sprintf("%.3f",$theta);
+	        my $gjf = "$molecule"."_PROJ_angle_".sprintf("%.3f",$theta);
 	        open  (GJF,">$gjf.input") or die "Could not create $gjf.\n";
-		print GJF "$curdir/STATE_$proj_state/ozone_sol"."$proj_state"."_angle_".sprintf("%.3f",$theta).".mat\n";
+		print GJF "$curdir/STATE_$proj_state/$molecule"."_sol"."$proj_state"."_angle_".sprintf("%.3f",$theta).".mat\n";
 	        close GJF;
 		open (OUT,">$gjf.out") or die "Could not open $gjf.out.\n";
-		print OUT " Ozone scan. PROJ, X = ".sprintf("%.5f",$i).", Y = ".sprintf("%.5f",$j)."\n\n";
+		print OUT " $molecule scan. PROJ, X = ".sprintf("%.5f",$i).", Y = ".sprintf("%.5f",$j)."\n\n";
 	        close OUT;
 	}
 	chdir("..");
@@ -130,15 +133,15 @@ if ($berry_state ne -1){
 	for (my $theta=0.0; $theta<2*pi; $theta+=2*pi/$steps){
 		my $i = $rad*cos($theta);
 		my $j = $rad*sin($theta);
-	        my $gjf = "ozone_NOCI_angle_".sprintf("%.3f",$theta);
+	        my $gjf = "$molecule"."_NOCI_angle_".sprintf("%.3f",$theta);
 	        open  (GJF,">$gjf.input") or die "Could not create $gjf.\n";
 		print GJF "$numfiles\n";
 		for (my $state=0; $state<=$numfiles-1; $state++){
-			print GJF "$curdir/STATE_$state/ozone_sol"."$state"."_angle_".sprintf("%.3f",$theta).".mat\n";
+			print GJF "$curdir/STATE_$state/$molecule"."_sol"."$state"."_angle_".sprintf("%.3f",$theta).".mat\n";
 		}
 	        close GJF;
 		open (OUT,">$gjf.out") or die "Could not open $gjf.out.\n";
-		print OUT " Ozone scan. NOCI, X = ".sprintf("%.5f",$i).", Y = ".sprintf("%.5f",$j)."\n\n";
+		print OUT " $molecule scan. NOCI, X = ".sprintf("%.5f",$i).", Y = ".sprintf("%.5f",$j)."\n\n";
 	        close OUT;
 	}
 	chdir("..");
@@ -187,7 +190,7 @@ if ($sub eq 1){
 			open (INPUT,$file) or die "Can't open input file $file\n";
 			chomp(my $projfile = <INPUT>);
 			close INPUT;
-        	        my $sys_cmd = "~/Documents/Wheeler-HIll-PUHF/WH_PUHF.exe -f $projfile $direct --scan-output --symmetry $symmetry >> $out_file";
+        	        my $sys_cmd = "$projroot/WH_PUHF.exe -f $projfile $direct --scan-output --symmetry $symmetry >> $out_file";
         	        system("$sys_cmd");
 			open (OUT,">>$out_file") or die "Could not open $out_file.\n";
         	        if ($? eq 0){
@@ -214,7 +217,7 @@ if ($sub eq 1){
         		unless($out_file =~ s/\.(?:input)/.out/){
         		        $out_file .= ".out";
         		}
-        		my $sys_cmd = "~/Documents/ResHF/ResHF.exe -f $file $direct --scan-output $berry_state >> $out_file";
+        		my $sys_cmd = "$nociroot/ResHF.exe -f $file $direct --scan-output ".sprintf("%s",$berry_state+1)." >> $out_file";
 			system("$sys_cmd");
 			open (OUT,">>$out_file") or die "Could not open $out_file.\n";
         	        if ($? eq 0){

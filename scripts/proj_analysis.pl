@@ -10,7 +10,7 @@ my %result = ();
 
 my $dir = $ARGV[0];
 die "Incorrect number of arguments passed to scf_analysis: ".$#ARGV+1 ."\n" if ($#ARGV ne 0);
-my @files = <$dir/*.log>;
+my @files = <$dir/*.out>;
 foreach my $file (@files){
         open(INPUT,$file) or die "Can't open file $file\n";
 
@@ -20,14 +20,14 @@ foreach my $file (@files){
         my $Energy = '';
 
         while(<INPUT>){
-                if (/^\s+Normal\s+termination\s+of\s+/){
+		if (/^JOB TERMINATION SUCCESS/){
                         $finish = 1;
                 }
-                if (/^\s+SCF Done:\s+E\(RHF\)\s+=\s+(-?\d+\.\d+)/){
+                if (/^\s+Energy\s+=\s+(-?\d+\.\d+)/){
                         $Energy = $1;
                         $Energy =~ s/D/E/;
                 }
-                if (/^\s+Ozone scan. State = \d+, X =\s+(-?\d+\.?\d*), Y =\s+(-?\d+\.?\d*)/){
+                if (/^\s+.*\s+scan. PROJ, X =\s+(-?\d+\.?\d*), Y =\s+(-?\d+\.?\d*)/){
                         $dist[0] = sprintf("%.5f",$1);
 			$dist[1] = sprintf("%.5f",$2);
                 }

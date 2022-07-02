@@ -30,7 +30,7 @@ foreach my $file (@files){
                                 $Energy = $Energy . "$arr[2]\t";
                         }
                 }
-                if (/^\s+Ozone scan. NOCI, X =\s+(-?\d+\.?\d*), Y =\s+(-?\d+\.?\d*)/){
+                if (/^\s+.*\s+scan. NOCI, X =\s+(-?\d+\.?\d*), Y =\s+(-?\d+\.?\d*)/){
                         $dist[0] = sprintf("%.5f",$1);
 			$dist[1] = sprintf("%.5f",$2);
                 }
